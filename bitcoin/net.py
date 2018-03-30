@@ -23,7 +23,7 @@ from bitcoin.core.serialize import (
 )
 from bitcoin.core import b2lx
 
-PROTO_VERSION = 60002
+PROTO_VERSION = 70001
 CADDR_TIME_VERSION = 31402
 IPV4_COMPAT = b"\x00" * 10 + b"\xff" * 2
 

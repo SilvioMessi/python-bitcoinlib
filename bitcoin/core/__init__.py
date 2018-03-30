@@ -733,6 +733,32 @@ class CBlock(CBlockHeader):
         """Return the block weight: (stripped_size * 3) + total_size"""
         return len(self.serialize(dict(include_witness=False))) * 3 + len(self.serialize())
 
+class MerkleBlock(CBlockHeader):
+    __slots__ = ['total_transactions', 'hashes', 'flags']
+
+    def __init__(self, nVersion=2, hashPrevBlock=b'\x00'*32, hashMerkleRoot=b'\x00'*32, nTime=0, nBits=0, nNonce=0, hashes=(), flags=()):
+        super(MerkleBlock, self).__init__(nVersion, hashPrevBlock, hashMerkleRoot, nTime, nBits, nNonce)
+        # TODO
+        pass
+
+    @classmethod
+    def stream_deserialize(cls, f):
+        self = super(MerkleBlock, cls).stream_deserialize(f)
+
+        total_transactions = struct.unpack(b"<I", ser_read(f,4))[0]
+        hashes = uint256VectorSerializer.stream_deserialize(f)
+        size_flags = VarIntSerializer.stream_deserialize(f)
+        flags = ser_read(f, size_flags)
+        object.__setattr__(self, 'total_transactions', total_transactions)
+        object.__setattr__(self, 'hashes', hashes)
+        object.__setattr__(self, 'flags', flags)
+
+        return self
+
+    def stream_serialize(self, f, include_witness=True):
+        # TODO
+        pass
+
 class CoreChainParams(object):
     """Define consensus-critical parameters of a given instance of the Bitcoin system"""
     MAX_MONEY = None
@@ -988,6 +1014,7 @@ __all__ = (
         'CTxInWitness',
         'CBlockHeader',
         'CBlock',
+        'MerkleBlock',
         'CoreChainParams',
         'CoreMainParams',
         'CoreTestNetParams',

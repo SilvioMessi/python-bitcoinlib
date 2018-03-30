@@ -30,6 +30,7 @@ else:
 
 # Bad practice, so we have a __all__ at the end; this should be cleaned up
 # later.
+from bitcoin.bloom import CBloomFilter
 from bitcoin.core import *
 from bitcoin.core.serialize import *
 from bitcoin.net import *
@@ -398,6 +399,34 @@ class msg_block(MsgSerializable):
     def __repr__(self):
         return "msg_block(block=%s)" % (repr(self.block))
 
+class msg_merkleblock(MsgSerializable):
+    command = b"merkleblock"
+
+    def __init__(self, protover=PROTO_VERSION):
+        super(msg_merkleblock, self).__init__(protover)
+        self.merkleblock = MerkleBlock()
+
+    @classmethod
+    def msg_deser(cls, f, protover=PROTO_VERSION):
+        c = cls()
+        c.merkleblock = MerkleBlock.stream_deserialize(f)
+        return c
+
+    def msg_ser(self, f):
+        self.merkleblock.stream_serialize(f)
+
+    def __repr__(self):
+        return "msg_merkleblock(merkleblock=%s)" % (repr(self.merkleblock))
+
+class msg_filterload(CBloomFilter, MsgSerializable):
+    command = b"filterload"
+
+    def msg_ser(self, f):
+        self.stream_serialize(f)
+
+    def __repr__(self):
+        return "msg_filterload"
+
 
 class msg_getaddr(MsgSerializable):
     command = b"getaddr"
@@ -500,8 +529,8 @@ class msg_mempool(MsgSerializable):
 
 msg_classes = [msg_version, msg_verack, msg_addr, msg_alert, msg_inv,
                msg_getdata, msg_notfound, msg_getblocks, msg_getheaders,
-               msg_headers, msg_tx, msg_block, msg_getaddr, msg_ping,
-               msg_pong, msg_reject, msg_mempool]
+               msg_headers, msg_tx, msg_block, msg_merkleblock, msg_filterload,
+               msg_getaddr,msg_ping, msg_pong, msg_reject, msg_mempool]
 
 messagemap = {}
 for cls in msg_classes:
@@ -530,6 +559,8 @@ __all__ = (
         'msg_headers',
         'msg_tx',
         'msg_block',
+        'msg_merkleblock',
+        'msg_filterload',
         'msg_getaddr',
         'msg_ping',
         'msg_pong',
