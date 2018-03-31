@@ -350,7 +350,9 @@ class msg_headers(MsgSerializable):
     @classmethod
     def msg_deser(cls, f, protover=PROTO_VERSION):
         c = cls()
-        c.headers = VectorSerializer.stream_deserialize(CBlockHeader, f)
+        # the block header has also the field txn_count
+        # but this one is deserialized in the CBlock class
+        c.headers = VectorSerializer.stream_deserialize(CBlock, f)
         return c
 
     def msg_ser(self, f):
