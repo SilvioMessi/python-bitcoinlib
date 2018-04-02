@@ -759,6 +759,31 @@ class MerkleBlock(CBlockHeader):
         # TODO
         pass
 
+    def get_header(self):
+        """Return the block header
+
+        Returned header is a new object.
+        """
+        return CBlockHeader(nVersion=self.nVersion,
+                            hashPrevBlock=self.hashPrevBlock,
+                            hashMerkleRoot=self.hashMerkleRoot,
+                            nTime=self.nTime,
+                            nBits=self.nBits,
+                            nNonce=self.nNonce)
+    
+    def GetHash(self):
+        """Return the block hash
+
+        Note that this is the hash of the header, not the entire serialized
+        block.
+        """
+        try:
+            return self._cached_GetHash
+        except AttributeError:
+            _cached_GetHash = self.get_header().GetHash()
+            object.__setattr__(self, '_cached_GetHash', _cached_GetHash)
+            return _cached_GetHash
+
 class CoreChainParams(object):
     """Define consensus-critical parameters of a given instance of the Bitcoin system"""
     MAX_MONEY = None
